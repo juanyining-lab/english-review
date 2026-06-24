@@ -1,0 +1,14 @@
+# 敏感資訊，絕對不可上傳
+token.txt
+anthropic_key.txt
+
+# Python 虛擬環境，不需要上傳（佔空間且每台電腦不通用）
+venv/
+
+# 原始 API 回應，可能含個資（姓名、評語等），先不公開
+sample_response.json
+all_comments.txt
+待複習_*.txt
+
+# Mac 系統產生的隱藏檔案
+.DS_Store
