@@ -1,4 +1,227 @@
-<!DOCTYPE html>
+"""
+讀取 API 資料，解析教師評語，產生互動式複習網頁
+輸出兩個檔案：data.js（資料）+ index.html（網頁）
+"""
+import requests
+import json
+import re
+from datetime import datetime
+from urllib.parse import unquote
+
+
+# ============================================================
+# 1. 抓取資料
+# ============================================================
+with open("token.txt", "r") as f:
+    raw_token = f.read().strip()
+token = unquote(raw_token)
+
+headers = {
+    "Authorization": token,
+    "Accept": "application/json",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+}
+
+api_url = "https://lms-api.winningenglishschool.com/appointments"
+params = {
+    "append": "tutor,overall_score",
+    "filter[status]": "2",
+    "include": "student,schedule,schedule.course,schedule.tutor,schedule.course_topic,schedule.assignment,student.agency,student_feedback",
+    "page": "1",
+    "withoutPagination": "1",
+    "sort": "-schedule_start",
+}
+
+resp = requests.get(api_url, headers=headers, params=params, timeout=15)
+resp.raise_for_status()
+data = resp.json()
+items = data.get("data", [])
+print("[資訊] 抓到 {} 筆課程".format(len(items)))
+
+
+# ============================================================
+# 2. 解析教師評語
+# ============================================================
+def parse_comments(raw):
+    if not raw:
+        return {"grammar": [], "vocabulary": [], "pronunciation": [], "feedback": "", "raw": ""}
+
+    result = {"grammar": [], "vocabulary": [], "pronunciation": [], "feedback": "", "raw": raw}
+
+    feedback_match = re.search(r'\[B\.?\]\s*FEEDBACK[:\s]*\n(.*)', raw, re.DOTALL | re.IGNORECASE)
+    if feedback_match:
+        result["feedback"] = feedback_match.group(1).strip()
+        raw_corrections = raw[:feedback_match.start()]
+    else:
+        hello_match = re.search(r'\n((?:Hello|Hi|Hey|Dear|Good)[^\n]*(?:\n(?!(?:[❌✔✅🛑🟢📣📌👉]))[^\n]*)*)', raw, re.DOTALL)
+        if hello_match and len(hello_match.group(1)) > 100:
+            result["feedback"] = hello_match.group(1).strip()
+        raw_corrections = raw
+
+    lines = raw_corrections.split('\n')
+    current_section = ""
+    i = 0
+
+    while i < len(lines):
+        line = lines[i].strip()
+
+        if re.match(r'(?:📌|🛑|🔴|👉)?\s*(?:Sentences?|Grammar|Suggested)', line, re.IGNORECASE):
+            current_section = "grammar"
+            i += 1
+            continue
+        elif re.match(r'(?:📌|🛑|🔴|👉)?\s*(?:Words?|Vocab)', line, re.IGNORECASE):
+            current_section = "vocabulary"
+            i += 1
+            continue
+        elif re.match(r'(?:📌|🛑|🔴|👉)?\s*(?:Pronunci)', line, re.IGNORECASE):
+            current_section = "pronunciation"
+            i += 1
+            continue
+        elif re.match(r'\[A\.?\]', line, re.IGNORECASE):
+            current_section = "corrections_header"
+            i += 1
+            continue
+        elif re.match(r'\[B\.?\]', line, re.IGNORECASE):
+            break
+
+        wrong_match = re.match(r'[❌✖️\u274c]\s*(.+)', line)
+        if wrong_match:
+            wrong = wrong_match.group(1).strip()
+            correct_sentences = []
+            explanation = ""
+            j = i + 1
+            while j < len(lines):
+                next_line = lines[j].strip()
+                correct_match = re.match(r'[✔✔️✅\u2714\u2705]\s*(.+)', next_line)
+                explain_match = re.match(r'📌\s*(.+)', next_line)
+                if correct_match:
+                    correct_sentences.append(correct_match.group(1).strip())
+                    j += 1
+                elif explain_match:
+                    explanation = explain_match.group(1).strip()
+                    j += 1
+                    break
+                else:
+                    break
+            if correct_sentences:
+                entry = {"wrong": wrong, "correct": correct_sentences[0], "explanation": explanation}
+                if len(correct_sentences) > 1:
+                    entry["alt_correct"] = correct_sentences[1]
+                result["grammar"].append(entry)
+            i = j
+            continue
+
+        if current_section == "grammar":
+            alt_wrong = re.match(r'[✅👉]\s*(.+)', line)
+            if alt_wrong:
+                wrong = alt_wrong.group(1).strip()
+                correct = ""
+                if i + 1 < len(lines):
+                    next_line = lines[i + 1].strip()
+                    correct_match = re.match(r'^[-–—]\s*(.+)', next_line)
+                    if correct_match:
+                        correct = correct_match.group(1).strip()
+                        i += 1
+                if wrong and correct:
+                    result["grammar"].append({"wrong": wrong, "correct": correct, "explanation": ""})
+                i += 1
+                continue
+
+        vocab_match = re.match(r'🟢\s*(.+?)\s*[–—-]\s*(.+)', line)
+        if vocab_match:
+            result["vocabulary"].append({"word": vocab_match.group(1).strip(), "definition": vocab_match.group(2).strip()})
+            i += 1
+            continue
+
+        if current_section == "vocabulary":
+            vocab_alt = re.match(r'[👉🟢]\s*(.+?)(?:\s*[–—:]\s*(.+))?$', line)
+            if vocab_alt and vocab_alt.group(1).strip() and len(vocab_alt.group(1).strip()) < 50:
+                word = vocab_alt.group(1).strip()
+                definition = vocab_alt.group(2).strip() if vocab_alt.group(2) else ""
+                result["vocabulary"].append({"word": word, "definition": definition})
+                i += 1
+                continue
+
+        pron_match = re.match(r'📣\s*(.+?)\s*(\/[^\/]+\/)', line)
+        if pron_match:
+            result["pronunciation"].append({"word": pron_match.group(1).strip(), "phonetics": pron_match.group(2).strip()})
+            i += 1
+            continue
+
+        if current_section == "pronunciation":
+            pron_alt = re.match(r'[👉📣]?\s*(.+?)\s*[:/]?\s*(\/[^\/]+\/)', line)
+            if pron_alt:
+                result["pronunciation"].append({"word": pron_alt.group(1).strip().rstrip(':'), "phonetics": pron_alt.group(2).strip()})
+                i += 1
+                continue
+
+        i += 1
+
+    return result
+
+
+# ============================================================
+# 3. 整理所有課程資料
+# ============================================================
+lessons = []
+for item in items:
+    schedule = item.get("schedule") or {}
+    start_str = schedule.get("start")
+    if not start_str:
+        continue
+    start_time = datetime.fromisoformat(start_str.replace("Z", "+00:00")).replace(tzinfo=None)
+    tutor = item.get("tutor") or {}
+    tutor_name = tutor.get("name", "未知老師") if isinstance(tutor, dict) else "未知老師"
+    comment = item.get("comments") or ""
+    zoom_link = schedule.get("video_link") or schedule.get("zoom_join_url") or item.get("zoom_join_url") or ""
+
+    parsed = parse_comments(comment)
+
+    lessons.append({
+        "date": start_time.strftime("%Y-%m-%d"),
+        "time": start_time.strftime("%H:%M"),
+        "timestamp": start_time.isoformat(),
+        "tutor": tutor_name,
+        "zoom_link": zoom_link,
+        "parsed": parsed,
+        "grammar_count": len(parsed["grammar"]),
+        "vocabulary_count": len(parsed["vocabulary"]),
+        "pronunciation_count": len(parsed["pronunciation"]),
+    })
+
+lessons.sort(key=lambda x: x["timestamp"], reverse=True)
+
+total_grammar = sum(l["grammar_count"] for l in lessons)
+total_vocab = sum(l["vocabulary_count"] for l in lessons)
+total_pron = sum(l["pronunciation_count"] for l in lessons)
+print("[解析] 文法糾正: {} 筆, 單字: {} 筆, 發音: {} 筆".format(total_grammar, total_vocab, total_pron))
+
+
+# ============================================================
+# 4. 輸出 data.js（純資料，用 ensure_ascii 確保安全）
+# ============================================================
+with open("data.js", "w", encoding="utf-8") as f:
+    f.write("var ALL_LESSONS = ")
+    json.dump(lessons, f, ensure_ascii=True)
+    f.write(";\n")
+    f.write("var SITE_INFO = ")
+    json.dump({
+        "updated": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "count": len(lessons),
+        "grammar": total_grammar,
+        "vocab": total_vocab,
+        "pron": total_pron,
+    }, f, ensure_ascii=True)
+    f.write(";\n")
+
+print("[完成] 已產生 data.js")
+
+
+# ============================================================
+# 5. 輸出 index.html（純網頁，不含任何動態資料）
+# ============================================================
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(r"""<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
@@ -302,4 +525,6 @@ function ansQ(el){
 renderN();
 </script>
 </body>
-</html>
+</html>""")
+
+print("[完成] 已產生 index.html")
