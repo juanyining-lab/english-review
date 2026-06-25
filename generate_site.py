@@ -305,6 +305,7 @@ body{font-family:-apple-system,"PingFang TC","Helvetica Neue",Arial,sans-serif;b
 .qs .sn{font-size:48px;font-weight:700;color:#0071e3}
 .qs .sl{font-size:14px;color:#86868b;margin-top:4px}
 .qr{margin-top:20px;padding:12px 32px;font-size:14px;font-weight:500;border:none;border-radius:10px;background:#0071e3;color:#fff;cursor:pointer}
+.pv{display:block;width:100%;padding:10px;font-size:13px;border:1px solid #e5e5e7;border-radius:10px;background:#fff;color:#86868b;cursor:pointer;margin-top:10px;text-align:center}
 </style>
 </head>
 <body>
@@ -466,6 +467,13 @@ function renderF(){
   for(var i=fcI.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=fcI[i];fcI[i]=fcI[j];fcI[j]=t}
   showF();
 }
+function flipFC(){
+  var card=document.getElementById('fcard');
+  if(card&&!card.classList.contains('flipped')){
+    card.classList.add('flipped');
+    document.getElementById('fcbtns').style.display='flex';
+  }
+}
 function showF(){
   var p=document.getElementById('fp');
   if(!fcI.length){p.innerHTML='<div class="empty">\u6c92\u6709\u7b26\u5408\u7be9\u9078\u689d\u4ef6\u7684\u8907\u7fd2\u9805\u76ee</div>';return}
@@ -476,25 +484,29 @@ function showF(){
   else if(it.type==='vocabulary'){fl='\u55ae\u5b57 \u2014 \u9019\u500b\u5b57\u662f\u4ec0\u9ebc\u610f\u601d\uff1f';fc='<strong>'+esc(it.word)+'</strong>';bc='<div class="ac">'+esc(it.definition||'\uff08\u8001\u5e2b\u6c92\u6709\u9644\u5b9a\u7fa9\uff09')+'</div>'}
   else{fl='\u767c\u97f3 \u2014 \u9019\u500b\u5b57\u600e\u9ebc\u553e\uff1f';fc='<strong>'+esc(it.word)+'</strong>';bc='<div class="ac">'+esc(it.phonetics)+'</div>'}
   var st=fg[it.id]||'',dot=st==='forgot'?' \ud83d\udd34':st==='unsure'?' \ud83d\udfe1':st==='got'?' \ud83d\udfe2':'';
+  var prevBtn=fcX>0?'<button class="pv" onclick="prevF()">\u2190 \u4e0a\u4e00\u984c</button>':'';
   p.innerHTML='<div class="fcp">'+(fcX+1)+' / '+tot+dot+'<br><span style="font-size:11px;color:#c7c7cc">'+it.lessonDate+' \u00b7 '+esc(it.tutor)+'</span></div>'
-    +'<div class="fc" id="fcard" onclick="document.getElementById(\'fcard\').classList.toggle(\'flipped\')">'
+    +'<div class="fc" id="fcard" onclick="flipFC()">'
     +'<div class="fl">'+fl+'</div><div class="fq">'+fc+'</div><div class="fh">\u9ede\u64ca\u7ffb\u9762</div><div class="fa">'+bc+'</div></div>'
-    +'<div class="rb"><button class="rf" onclick="rateC(\'forgot\')">\u5fd8\u4e86</button>'
+    +'<div class="rb" id="fcbtns" style="display:none"><button class="rf" onclick="rateC(\'forgot\')">\u5fd8\u4e86</button>'
     +'<button class="ru" onclick="rateC(\'unsure\')">\u4e0d\u78ba\u5b9a</button>'
-    +'<button class="rg" onclick="rateC(\'got\')">\u8a18\u5f97</button></div>';
+    +'<button class="rg" onclick="rateC(\'got\')">\u8a18\u5f97</button></div>'
+    +prevBtn;
 }
+function prevF(){if(fcX>0){fcX--;showF()}}
 function rateC(lv){var fg=gfi();fg[fcI[fcX].id]=lv;sfi(fg);fcX++;showF()}
 
-var qI=[],qX=0,qS=0;
+var qI=[],qX=0,qS=0,qH={};
 function renderQ(){
   var cs=getFC().filter(function(c){return c.type==='grammar'&&c.correct});
   for(var i=cs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=cs[i];cs[i]=cs[j];cs[j]=t}
-  qI=cs.slice(0,10);qX=0;qS=0;showQ();
+  qI=cs.slice(0,10);qX=0;qS=0;qH={};showQ();
 }
 function showQ(){
   var p=document.getElementById('qp');
   if(!qI.length){p.innerHTML='<div class="empty">\u6c92\u6709\u8db3\u5920\u7684\u6587\u6cd5\u7cfe\u6b63\u4f86\u7522\u751f\u6e2c\u9a57\u984c<br><span style="font-size:12px;color:#c7c7cc">\uff08\u6e2c\u9a57\u76ee\u524d\u53ea\u652f\u63f4\u6587\u6cd5\u985e\u578b\u7684\u984c\u76ee\uff09</span></div>';return}
   if(qX>=qI.length){var pct=Math.round(qS/qI.length*100);p.innerHTML='<div class="qs"><div class="sn">'+pct+'%</div><div class="sl">'+qS+' / '+qI.length+' \u7b54\u5c0d</div><button class="qr" onclick="renderQ()">\u518d\u6e2c\u4e00\u6b21</button></div>';return}
+  if(qH[qX]){p.innerHTML=qH[qX];return}
   var it=qI[qX],opts=[];
   opts.push({text:it.correct,ok:1});
   opts.push({text:it.wrong,ok:0});
@@ -503,10 +515,12 @@ function showQ(){
   for(var i=opts.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=opts[i];opts[i]=opts[j];opts[j]=t}
   var letters=['A','B','C'],oh='';
   for(var i=0;i<opts.length;i++){oh+='<div class="qo" data-ok="'+opts[i].ok+'" onclick="ansQ(this)">'+letters[i]+'. '+esc(opts[i].text)+'</div>'}
+  var prevBtn=qX>0?'<button class="pv" onclick="prevQ()">\u2190 \u4e0a\u4e00\u984c</button>':'';
   p.innerHTML='<div class="qc"><div class="ql">\u7b2c '+(qX+1)+' \u984c / \u5171 '+qI.length+' \u984c\u3000<span style="font-size:11px;color:#c7c7cc">'+it.lessonDate+'</span></div>'
     +'<div class="qq">\u9078\u51fa\u6587\u6cd5\u6b63\u78ba\u7684\u53e5\u5b50\uff1a</div><div id="qos">'+oh+'</div>'
-    +'<div class="qfb" id="qfb"></div><button class="qnb" id="qnb" onclick="qX++;showQ()">\u4e0b\u4e00\u984c</button></div>';
+    +'<div class="qfb" id="qfb"></div><button class="qnb" id="qnb" onclick="qX++;showQ()">\u4e0b\u4e00\u984c</button>'+prevBtn+'</div>';
 }
+function prevQ(){if(qX>0){qX--;showQ()}}
 function ansQ(el){
   var ok=el.getAttribute('data-ok')==='1';
   var opts=document.querySelectorAll('#qos .qo');
@@ -520,6 +534,7 @@ function ansQ(el){
   if(it.explanation){fb.innerHTML=(ok?'\u2713 \u6b63\u78ba\uff01':'\u2717 \u932f\u4e86\uff01')+'<br><span style="color:#6b7280">'+esc(it.explanation)+'</span>'}
   else{fb.textContent=ok?'\u2713 \u6b63\u78ba\uff01':'\u2717 \u7b54\u932f\u4e86\uff0c\u6b63\u78ba\u7b54\u6848\u5df2\u6a19\u793a\u3002'}
   document.getElementById('qnb').style.display='block';
+  qH[qX]=document.getElementById('qp').innerHTML;
 }
 
 renderN();
