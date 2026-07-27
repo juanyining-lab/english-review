@@ -228,118 +228,153 @@ with open("index.html", "w", encoding="utf-8") as f:
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>English Review</title>
 <style>
+:root{
+  --coral:#FF6F59;--coral-dark:#E85A45;--coral-light:#FFF0EA;
+  --purple:#9B7EDE;--purple-dark:#7C5EC7;--purple-light:#F2ECFF;
+  --amber:#F5A623;--amber-light:#FFF5E0;
+  --green:#3CB878;--green-light:#E8FBF0;
+  --red:#FF5A5F;--red-light:#FFEBEC;
+  --ink:#3D2E28;--ink-soft:#8A7A70;
+  --bg:#FFF9F5;--card:#FFFFFF;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,"PingFang TC","Helvetica Neue",Arial,sans-serif;background:#f5f5f7;color:#1d1d1f;-webkit-font-smoothing:antialiased;padding-bottom:80px}
-.header{background:#fff;padding:16px 20px 0;border-bottom:1px solid #e5e5e7;position:sticky;top:0;z-index:100}
-.header h1{font-size:20px;font-weight:600;margin-bottom:2px}
-.sub{font-size:12px;color:#86868b;margin-bottom:12px}
-.tabs{display:flex}
-.tabs button{flex:1;padding:10px 0;font-size:13px;font-weight:500;border:none;background:none;cursor:pointer;color:#86868b;border-bottom:2px solid transparent}
-.tabs button.active{color:#0071e3;border-bottom-color:#0071e3}
-.filters{display:flex;gap:8px;padding:12px 20px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+body{font-family:-apple-system,"PingFang TC","Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;padding-bottom:80px}
+.header{background:linear-gradient(135deg,#FFF4ED 0%,#FFF9F5 60%);padding:18px 20px 0;border-bottom:1px solid #FCE8DE;position:sticky;top:0;z-index:100}
+.header h1{font-size:21px;font-weight:700;margin-bottom:2px;color:var(--ink)}
+.sub{font-size:12px;color:var(--ink-soft);margin-bottom:12px}
+.tabs{display:flex;gap:4px;background:#FFF1E8;border-radius:999px;padding:4px;margin-bottom:2px}
+.tabs button{flex:1;padding:9px 0;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:var(--ink-soft);border-radius:999px;transition:all .2s}
+.tabs button.active{color:#fff;background:linear-gradient(135deg,var(--coral),var(--purple));box-shadow:0 2px 8px rgba(255,111,89,.3)}
+.filters{display:flex;gap:8px;padding:14px 20px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .filters::-webkit-scrollbar{display:none}
-.fg{display:flex;gap:4px;flex-shrink:0}
-.fs{width:1px;background:#e5e5e7;margin:4px}
-.fb{padding:6px 12px;font-size:12px;border:1px solid #e5e5e7;border-radius:20px;background:#fff;cursor:pointer;white-space:nowrap;color:#1d1d1f}
-.fb.on{background:#0071e3;color:#fff;border-color:#0071e3}
+.fg{display:flex;gap:6px;flex-shrink:0}
+.fs{width:1px;background:#F0DFD4;margin:4px}
+.fb{padding:7px 14px;font-size:12px;font-weight:500;border:1px solid #F0DFD4;border-radius:999px;background:#fff;cursor:pointer;white-space:nowrap;color:var(--ink-soft);transition:all .15s}
+.fb.on{background:var(--coral);color:#fff;border-color:var(--coral)}
 .content{padding:12px 16px}
-.lc{background:#fff;border-radius:12px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-.lh{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.lc{background:var(--card);border-radius:18px;margin-bottom:12px;overflow:hidden;box-shadow:0 2px 10px rgba(255,111,89,.06)}
+.lh{padding:15px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
 .lm{display:flex;flex-direction:column;gap:2px}
-.ld{font-weight:600;font-size:15px}
-.lt{font-size:12px;color:#86868b}
+.ld{font-weight:700;font-size:15px;color:var(--ink)}
+.lt{font-size:12px;color:var(--ink-soft)}
 .lbs{display:flex;gap:4px}
-.bd{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:500}
-.bd-g{background:#fef2f2;color:#dc2626}
-.bd-v{background:#eff6ff;color:#2563eb}
-.bd-p{background:#fffbeb;color:#d97706}
-.ar{color:#86868b;font-size:14px;transition:transform .2s}
+.bd{font-size:10px;padding:3px 8px;border-radius:999px;font-weight:600}
+.bd-g{background:var(--coral-light);color:var(--coral-dark)}
+.bd-v{background:var(--purple-light);color:var(--purple-dark)}
+.bd-p{background:var(--amber-light);color:#B87200}
+.ar{color:var(--ink-soft);font-size:14px;transition:transform .2s}
 .lc.open .ar{transform:rotate(180deg)}
-.lb{display:none;padding:0 16px 16px;border-top:1px solid #f0f0f0}
+.lb{display:none;padding:0 16px 16px;border-top:1px solid #FBEFE7}
 .lc.open .lb{display:block}
-.cc{margin-top:12px;padding:12px;border-radius:10px;border-left:3px solid}
-.cc-g{background:#fef8f8;border-color:#ef4444}
-.cc-v{background:#f0f7ff;border-color:#3b82f6}
-.cc-p{background:#fffdf5;border-color:#f59e0b}
-.ct{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-.ct-g{color:#dc2626}
-.ct-v{color:#2563eb}
-.ct-p{color:#d97706}
-.wr{color:#dc2626;font-size:14px;line-height:1.6;margin-bottom:4px}
-.cr{color:#16a34a;font-size:14px;line-height:1.6;margin-bottom:4px}
-.ex{font-size:13px;color:#6b7280;background:rgba(0,0,0,.03);padding:8px 10px;border-radius:6px;margin-top:6px;line-height:1.5}
+.cc{margin-top:12px;padding:14px;border-radius:14px;border-left:4px solid}
+.cc-g{background:var(--coral-light);border-color:var(--coral)}
+.cc-v{background:var(--purple-light);border-color:var(--purple)}
+.cc-p{background:var(--amber-light);border-color:var(--amber)}
+.ct{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.ct-g{color:var(--coral-dark)}
+.ct-v{color:var(--purple-dark)}
+.ct-p{color:#B87200}
+.wr{color:var(--red);font-size:14px;line-height:1.6;margin-bottom:4px}
+.cr{color:var(--green);font-size:14px;line-height:1.6;margin-bottom:4px}
+.ex{font-size:13px;color:var(--ink-soft);background:rgba(255,255,255,.6);padding:9px 11px;border-radius:10px;margin-top:6px;line-height:1.5}
 .we{font-size:14px;line-height:1.6}
-.we strong{font-weight:600}
-.zl{display:inline-block;margin-top:12px;color:#0071e3;text-decoration:none;font-size:13px}
-.rc{white-space:pre-wrap;word-wrap:break-word;font-size:13px;line-height:1.6;color:#6b7280;margin-top:12px;padding:12px;background:#f9f9f9;border-radius:8px}
+.we strong{font-weight:700}
+.zl{display:inline-block;margin-top:12px;color:var(--purple-dark);text-decoration:none;font-size:13px;font-weight:600}
+.rc{white-space:pre-wrap;word-wrap:break-word;font-size:13px;line-height:1.6;color:var(--ink-soft);margin-top:12px;padding:12px;background:#FBF6F2;border-radius:12px}
 .fcc{padding:12px 16px}
-.fcp{text-align:center;font-size:13px;color:#86868b;margin-bottom:12px}
-.fc{background:#fff;border-radius:16px;padding:32px 20px;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);user-select:none}
+.fcp{text-align:center;font-size:13px;color:var(--ink-soft);margin-bottom:12px}
+.fc{background:linear-gradient(160deg,#fff,#FFF7F2);border-radius:22px;padding:32px 20px;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;text-align:center;box-shadow:0 4px 16px rgba(255,111,89,.12);user-select:none}
 .fc:active{transform:scale(.98)}
-.fc .fl{font-size:11px;color:#86868b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px}
+.fc .fl{font-size:11px;color:var(--coral-dark);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px}
 .fc .fq{font-size:17px;line-height:1.6}
-.fc .fh{font-size:12px;color:#c7c7cc;margin-top:20px}
+.fc .fh{font-size:12px;color:#D8B9A8;margin-top:20px}
 .fc .fa{display:none}
 .fc.flipped .fq,.fc.flipped .fh,.fc.flipped .fl{display:none}
 .fc.flipped .fa{display:block}
-.ac{font-size:17px;line-height:1.6;color:#16a34a;margin-bottom:12px}
-.ae{font-size:13px;color:#6b7280;background:#f5f5f7;padding:10px 12px;border-radius:8px;text-align:left;line-height:1.5}
+.ac{font-size:17px;line-height:1.6;color:var(--green);font-weight:600;margin-bottom:12px}
+.ae{font-size:13px;color:var(--ink-soft);background:var(--purple-light);padding:10px 12px;border-radius:12px;text-align:left;line-height:1.5}
 .rb{display:flex;gap:8px;margin-top:16px}
-.rb button{flex:1;padding:12px;font-size:14px;font-weight:500;border:none;border-radius:10px;cursor:pointer}
-.rf{background:#fef2f2;color:#dc2626}
-.ru{background:#fffbeb;color:#d97706}
-.rg{background:#f0fdf4;color:#16a34a}
-.empty{text-align:center;padding:40px 20px;color:#86868b;font-size:14px}
-.qc{background:#fff;border-radius:12px;padding:20px 16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-.ql{font-size:12px;color:#86868b;margin-bottom:8px}
-.qq{font-size:15px;line-height:1.6;margin-bottom:16px}
-.qo{padding:12px 14px;border:1px solid #e5e5e7;border-radius:10px;margin-bottom:8px;cursor:pointer;font-size:14px;line-height:1.5}
+.rb button{flex:1;padding:12px;font-size:14px;font-weight:600;border:none;border-radius:14px;cursor:pointer}
+.rf{background:var(--red-light);color:var(--red)}
+.ru{background:var(--amber-light);color:#B87200}
+.rg{background:var(--green-light);color:var(--green)}
+.empty{text-align:center;padding:40px 20px;color:var(--ink-soft);font-size:14px}
+.qc{background:var(--card);border-radius:18px;padding:20px 16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(255,111,89,.06)}
+.ql{font-size:12px;color:var(--ink-soft);margin-bottom:8px}
+.qq{font-size:15px;line-height:1.6;margin-bottom:16px;font-weight:600}
+.qo{padding:13px 14px;border:1.5px solid #F0DFD4;border-radius:14px;margin-bottom:8px;cursor:pointer;font-size:14px;line-height:1.5;transition:all .15s}
 .qo:active{transform:scale(.98)}
-.qo.ok{background:#f0fdf4;border-color:#16a34a;color:#16a34a}
-.qo.bad{background:#fef2f2;border-color:#dc2626;color:#dc2626}
-.qo.show{background:#f0fdf4;border-color:#16a34a;color:#16a34a}
-.qo.off{pointer-events:none;opacity:.5}
-.qfb{margin-top:10px;padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.5;display:none}
-.qnb{display:none;width:100%;padding:12px;font-size:14px;font-weight:500;border:none;border-radius:10px;background:#0071e3;color:#fff;cursor:pointer;margin-top:12px}
+.qo.ok{background:var(--green-light);border-color:var(--green);color:var(--green)}
+.qo.bad{background:var(--red-light);border-color:var(--red);color:var(--red)}
+.qo.show{background:var(--green-light);border-color:var(--green);color:var(--green)}
+.qo.off{pointer-events:none;opacity:.6}
+.qfb{margin-top:10px;padding:11px 12px;border-radius:12px;font-size:13px;line-height:1.5;display:none}
+.qnb{display:none;width:100%;padding:13px;font-size:14px;font-weight:700;border:none;border-radius:14px;background:linear-gradient(135deg,var(--coral),var(--purple));color:#fff;cursor:pointer;margin-top:12px}
 .qs{text-align:center;padding:32px 20px}
-.qs .sn{font-size:48px;font-weight:700;color:#0071e3}
-.qs .sl{font-size:14px;color:#86868b;margin-top:4px}
-.qr{margin-top:20px;padding:12px 32px;font-size:14px;font-weight:500;border:none;border-radius:10px;background:#0071e3;color:#fff;cursor:pointer}
-.pv{display:block;width:100%;padding:10px;font-size:13px;border:1px solid #e5e5e7;border-radius:10px;background:#fff;color:#86868b;cursor:pointer;margin-top:10px;text-align:center}
+.qs .sn{font-size:48px;font-weight:800;background:linear-gradient(135deg,var(--coral),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+.qs .sl{font-size:14px;color:var(--ink-soft);margin-top:4px}
+.qr{margin-top:20px;padding:12px 32px;font-size:14px;font-weight:700;border:none;border-radius:999px;background:linear-gradient(135deg,var(--coral),var(--purple));color:#fff;cursor:pointer}
+.pv{display:block;width:100%;padding:10px;font-size:13px;border:1px solid #F0DFD4;border-radius:14px;background:#fff;color:var(--ink-soft);cursor:pointer;margin-top:10px;text-align:center}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.dcard{border-radius:20px;padding:20px 16px;text-align:center;box-shadow:0 2px 10px rgba(255,111,89,.08)}
+.dcard .de{font-size:28px;margin-bottom:6px}
+.dcard .dn{font-size:26px;font-weight:800;color:var(--ink)}
+.dcard .dl{font-size:12px;color:var(--ink-soft);margin-top:2px}
+.dc1{background:var(--coral-light)}
+.dc2{background:var(--purple-light)}
+.dc3{background:var(--amber-light)}
+.dc4{background:var(--green-light)}
+.dsec{background:var(--card);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(255,111,89,.06)}
+.dsh{font-size:14px;font-weight:700;margin-bottom:8px}
+.dpl{font-size:12px;color:var(--ink-soft);margin-bottom:8px}
+.pbar{height:10px;border-radius:999px;background:#FBEFE7;overflow:hidden}
+.pbar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--coral),#FF9166);transition:width .5s}
+.pbar-mastery{background:linear-gradient(90deg,var(--green),#6ED6A0)}
+.pbar-g{background:linear-gradient(90deg,var(--coral),#FF9166)}
+.pbar-v{background:linear-gradient(90deg,var(--purple),#B79CEE)}
+.pbar-p{background:linear-gradient(90deg,var(--amber),#FFC862)}
+.dtyperow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.dtyperow:last-child{margin-bottom:0}
+.dtlabel{font-size:12px;color:var(--ink-soft);width:56px;flex-shrink:0}
+.dtyperow .pbar{flex:1}
+.dtpct{font-size:12px;font-weight:700;color:var(--ink);width:28px;text-align:right;flex-shrink:0}
 </style>
 </head>
 <body>
 <div class="header">
-  <h1>English Review</h1>
+  <h1>📚 English Review</h1>
   <div class="sub" id="info"></div>
   <div class="tabs">
-    <button class="active" onclick="switchTab('notes',this)">筆記</button>
-    <button onclick="switchTab('fc',this)">翻牌複習</button>
-    <button onclick="switchTab('qz',this)">小測驗</button>
+    <button class="active" onclick="switchTab('notes',this)">📝 筆記</button>
+    <button onclick="switchTab('fc',this)">🔄 翻牌複習</button>
+    <button onclick="switchTab('qz',this)">✅ 小測驗</button>
+    <button onclick="switchTab('dash',this)">📊 儀表板</button>
   </div>
 </div>
-<div class="filters">
+<div class="filters" id="filterbar">
   <div class="fg">
     <button class="fb on" onclick="setTF('all',this)">全部</button>
     <button class="fb" onclick="setTF('1',this)">最近 1 堂</button>
     <button class="fb" onclick="setTF('5',this)">近 5 堂</button>
+    <button class="fb" onclick="setTF('week',this)">近一週</button>
     <button class="fb" onclick="setTF('month',this)">近一個月</button>
   </div>
   <div class="fs"></div>
   <div class="fg">
     <button class="fb on" onclick="setTyF('all',this)">全部類型</button>
-    <button class="fb" onclick="setTyF('grammar',this)">文法</button>
-    <button class="fb" onclick="setTyF('vocabulary',this)">單字</button>
-    <button class="fb" onclick="setTyF('pronunciation',this)">發音</button>
+    <button class="fb" onclick="setTyF('grammar',this)">✏️ 文法</button>
+    <button class="fb" onclick="setTyF('vocabulary',this)">📖 單字</button>
+    <button class="fb" onclick="setTyF('pronunciation',this)">🗣️ 發音</button>
   </div>
   <div class="fs" id="ffs" style="display:none"></div>
   <div class="fg" id="ffg" style="display:none">
-    <button class="fb" id="ffb" onclick="toggleFF(this)">只看忘了的</button>
+    <button class="fb" id="ffb" onclick="toggleFF(this)">🔴 只看忘了的</button>
   </div>
 </div>
 <div id="np" class="content"></div>
 <div id="fp" class="fcc" style="display:none"></div>
 <div id="qp" style="padding:12px 16px;display:none"></div>
+<div id="dp" class="content" style="display:none"></div>
 
 <script src="data.js"></script>
 <script>
@@ -358,6 +393,7 @@ function getFL(){
   var ls=ALL_LESSONS;
   if(tF==='1')ls=ls.slice(0,1);
   else if(tF==='5')ls=ls.slice(0,5);
+  else if(tF==='week'){var c=new Date();c.setDate(c.getDate()-7);ls=ls.filter(function(l){return new Date(l.timestamp)>=c})}
   else if(tF==='month'){var c=new Date();c.setDate(c.getDate()-30);ls=ls.filter(function(l){return new Date(l.timestamp)>=c})}
   return ls;
 }
@@ -396,6 +432,8 @@ function switchTab(t,btn){
   document.getElementById('np').style.display=t==='notes'?'block':'none';
   document.getElementById('fp').style.display=t==='fc'?'block':'none';
   document.getElementById('qp').style.display=t==='qz'?'block':'none';
+  document.getElementById('dp').style.display=t==='dash'?'block':'none';
+  document.getElementById('filterbar').style.display=t==='dash'?'none':'flex';
   document.getElementById('ffg').style.display=t==='fc'?'flex':'none';
   document.getElementById('ffs').style.display=t==='fc'?'block':'none';
   doRender();
@@ -411,7 +449,7 @@ function setTyF(v,btn){
   btn.className='fb on';doRender();
 }
 function toggleFF(btn){fO=!fO;btn.className=fO?'fb on':'fb';doRender()}
-function doRender(){if(cT==='notes')renderN();else if(cT==='fc')renderF();else if(cT==='qz')renderQ()}
+function doRender(){if(cT==='notes')renderN();else if(cT==='fc')renderF();else if(cT==='qz')renderQ();else if(cT==='dash')renderD()}
 function toggleL(id){var el=document.getElementById(id);if(el)el.classList.toggle('open')}
 
 function renderN(){
@@ -488,9 +526,9 @@ function showF(){
   p.innerHTML='<div class="fcp">'+(fcX+1)+' / '+tot+dot+'<br><span style="font-size:11px;color:#c7c7cc">'+it.lessonDate+' \u00b7 '+esc(it.tutor)+'</span></div>'
     +'<div class="fc" id="fcard" onclick="flipFC()">'
     +'<div class="fl">'+fl+'</div><div class="fq">'+fc+'</div><div class="fh">\u9ede\u64ca\u7ffb\u9762</div><div class="fa">'+bc+'</div></div>'
-    +'<div class="rb" id="fcbtns" style="display:none"><button class="rf" onclick="rateC(\'forgot\')">\u5fd8\u4e86</button>'
-    +'<button class="ru" onclick="rateC(\'unsure\')">\u4e0d\u78ba\u5b9a</button>'
-    +'<button class="rg" onclick="rateC(\'got\')">\u8a18\u5f97</button></div>'
+    +'<div class="rb" id="fcbtns" style="display:none"><button class="rf" onclick="rateC(\'forgot\')">\ud83d\ude35 \u5fd8\u4e86</button>'
+    +'<button class="ru" onclick="rateC(\'unsure\')">\ud83e\udd14 \u4e0d\u78ba\u5b9a</button>'
+    +'<button class="rg" onclick="rateC(\'got\')">\u2705 \u8a18\u5f97</button></div>'
     +prevBtn;
 }
 function prevF(){if(fcX>0){fcX--;showF()}}
@@ -535,6 +573,37 @@ function ansQ(el){
   else{fb.textContent=ok?'\u2713 \u6b63\u78ba\uff01':'\u2717 \u7b54\u932f\u4e86\uff0c\u6b63\u78ba\u7b54\u6848\u5df2\u6a19\u793a\u3002'}
   document.getElementById('qnb').style.display='block';
   qH[qX]=document.getElementById('qp').innerHTML;
+}
+
+function renderD(){
+  var p=document.getElementById('dp'),fg=gfi();
+  var totalItems=SITE_INFO.grammar+SITE_INFO.vocab+SITE_INFO.pron;
+  var keys=Object.keys(fg),reviewed=keys.length,got=0,unsure=0,forgot=0;
+  for(var i=0;i<keys.length;i++){
+    var v=fg[keys[i]];
+    if(v==='got')got++;else if(v==='unsure')unsure++;else if(v==='forgot')forgot++;
+  }
+  var reviewPct=totalItems>0?Math.round(reviewed/totalItems*100):0;
+  var masteryPct=reviewed>0?Math.round(got/reviewed*100):0;
+  var gPct=totalItems>0?Math.round(SITE_INFO.grammar/totalItems*100):0;
+  var vPct=totalItems>0?Math.round(SITE_INFO.vocab/totalItems*100):0;
+  var prPct=totalItems>0?Math.round(SITE_INFO.pron/totalItems*100):0;
+  var h='';
+  h+='<div class="dgrid">';
+  h+='<div class="dcard dc1"><div class="de">📚</div><div class="dn">'+SITE_INFO.count+'</div><div class="dl">總課程</div></div>';
+  h+='<div class="dcard dc2"><div class="de">✏️</div><div class="dn">'+SITE_INFO.grammar+'</div><div class="dl">文法糾正</div></div>';
+  h+='<div class="dcard dc3"><div class="de">📖</div><div class="dn">'+SITE_INFO.vocab+'</div><div class="dl">單字</div></div>';
+  h+='<div class="dcard dc4"><div class="de">🗣️</div><div class="dn">'+SITE_INFO.pron+'</div><div class="dl">發音</div></div>';
+  h+='</div>';
+  h+='<div class="dsec"><div class="dsh">🎯 複習進度</div><div class="dpl">已複習 '+reviewed+' / '+totalItems+' 項（'+reviewPct+'%）</div><div class="pbar"><div class="pbar-fill" style="width:'+reviewPct+'%"></div></div></div>';
+  h+='<div class="dsec"><div class="dsh">🌟 熟悉度</div><div class="dpl">✅ '+got+' 記得　🤔 '+unsure+' 不確定　😵 '+forgot+' 忘了</div><div class="pbar"><div class="pbar-fill pbar-mastery" style="width:'+masteryPct+'%"></div></div></div>';
+  h+='<div class="dsec"><div class="dsh">📊 內容分布</div>';
+  h+='<div class="dtyperow"><span class="dtlabel">✏️ 文法</span><div class="pbar"><div class="pbar-fill pbar-g" style="width:'+gPct+'%"></div></div><span class="dtpct">'+SITE_INFO.grammar+'</span></div>';
+  h+='<div class="dtyperow"><span class="dtlabel">📖 單字</span><div class="pbar"><div class="pbar-fill pbar-v" style="width:'+vPct+'%"></div></div><span class="dtpct">'+SITE_INFO.vocab+'</span></div>';
+  h+='<div class="dtyperow"><span class="dtlabel">🗣️ 發音</span><div class="pbar"><div class="pbar-fill pbar-p" style="width:'+prPct+'%"></div></div><span class="dtpct">'+SITE_INFO.pron+'</span></div>';
+  h+='</div>';
+  if(!reviewed){h+='<div class="empty">還沒有複習紀錄，去「翻牌複習」開始累積吧 🚀</div>'}
+  p.innerHTML=h;
 }
 
 renderN();
